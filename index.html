@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Círculo Trigonométrico · sen · cos · tan</title>
+<style>
+  :root{
+    --bg:#0d1220;
+    --bg2:#151d30;
+    --panel:#1a2338;
+    --panel2:#222d47;
+    --line:#2c3a58;
+    --text:#e7eefb;
+    --muted:#93a3c4;
+    --sin:#3ddc84;
+    --cos:#4a9bff;
+    --tan:#ff9f43;
+    --acc:#8b7cff;
+    --ok:#3ddc84;
+    --err:#ff5d6c;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #1b2848 0%, var(--bg) 60%) fixed;
+    color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  header{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:blur(10px);
+    background:rgba(13,18,32,.82);
+    border-bottom:1px solid var(--line);
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+  .bar{display:flex;align-items:center;gap:12px;padding:12px 0}
+  .logo{font-weight:800;font-size:1.05rem;letter-spacing:.3px;white-space:nowrap}
+  .logo .s{color:var(--sin)} .logo .c{color:var(--cos)} .logo .t{color:var(--tan)}
+  .spacer{flex:1}
+  .iconbtn{
+    background:var(--panel);color:var(--text);border:1px solid var(--line);
+    border-radius:12px;padding:8px 12px;cursor:pointer;font-size:1rem;
+  }
+  .iconbtn:hover{background:var(--panel2)}
+  nav{display:flex;gap:6px;overflow-x:auto;padding:4px 0 12px}
+  nav button{
+    flex:0 0 auto;
+    background:transparent;color:var(--muted);border:1px solid transparent;
+    border-radius:999px;padding:8px 14px;cursor:pointer;font-size:.9rem;font-weight:600;
+    white-space:nowrap;
+  }
+  nav button:hover{color:var(--text)}
+  nav button.active{background:var(--panel2);color:var(--text);border-color:var(--line)}
+  main{padding:22px 0 70px}
+  .screen{display:none;animation:fade .25s ease}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  h2{margin:.2em 0 .5em;font-size:1.5rem}
+  h3{margin:1.2em 0 .5em;font-size:1.1rem;color:#cdd9f2}
+  p{color:#d3ddf2}
+  .muted{color:var(--muted)}
+  a{color:var(--acc)}
+
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--bg2));
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;margin:14px 0;
+  }
+  .grid{display:grid;gap:16px}
+  @media(min-width:820px){ .grid.two{grid-template-columns:1fr 1fr} .grid.lab{grid-template-columns:minmax(0,1fr) 320px} }
+
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.78rem;font-weight:700;border:1px solid var(--line)}
+  .pill.s{color:var(--sin);border-color:color-mix(in srgb,var(--sin) 45%,transparent)}
+  .pill.c{color:var(--cos);border-color:color-mix(in srgb,var(--cos) 45%,transparent)}
+  .pill.t{color:var(--tan);border-color:color-mix(in srgb,var(--tan) 45%,transparent)}
+
+  canvas{display:block;width:100%;border-radius:12px;background:#0b1020;border:1px solid var(--line);touch-action:none}
+
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+  button.btn{
+    background:var(--panel2);color:var(--text);border:1px solid var(--line);
+    border-radius:12px;padding:9px 14px;cursor:pointer;font-weight:600;font-size:.92rem;
+  }
+  button.btn:hover{background:#2b3760}
+  button.btn.primary{background:linear-gradient(180deg,#6f5cff,#5a49e6);border-color:#6f5cff}
+  button.btn.primary:hover{filter:brightness(1.08)}
+  button.btn.on{outline:2px solid var(--acc);outline-offset:1px}
+  input[type=range]{accent-color:var(--acc);width:100%}
+  label.chk{display:inline-flex;align-items:center;gap:7px;cursor:pointer;user-select:none;font-size:.9rem;color:#cfd9ef}
+  input[type=checkbox]{accent-color:var(--acc);width:17px;height:17px}
+
+  table{border-collapse:collapse;width:100%;font-size:.92rem}
+  th,td{border:1px solid var(--line);padding:8px 6px;text-align:center}
+  th{background:var(--panel2);color:#cbd7f2;font-weight:700}
+  td.s{color:var(--sin)} td.c{color:var(--cos)} td.t{color:var(--tan)}
+  .scrollx{overflow-x:auto}
+
+  .readout{display:grid;gap:8px}
+  .rowline{display:flex;justify-content:space-between;align-items:baseline;gap:10px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .rowline .k{font-weight:700}
+  .rowline .v{font-variant-numeric:tabular-nums;font-size:1.05rem}
+  .bigangle{font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;margin-top:8px}
+  .legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:5px}
+  .legend .ls i{background:var(--sin)} .legend .lc i{background:var(--cos)} .legend .lt i{background:var(--tan)}
+
+  .opt{display:block;width:100%;text-align:left;margin:8px 0;padding:13px 15px;border-radius:12px;
+       background:var(--panel2);border:1px solid var(--line);color:var(--text);cursor:pointer;font-size:1rem;font-weight:600}
+  .opt:hover{border-color:var(--acc)}
+  .opt.good{background:rgba(61,220,132,.16);border-color:var(--ok)}
+  .opt.bad{background:rgba(255,93,108,.16);border-color:var(--err)}
+  .opt:disabled{cursor:default;opacity:.9}
+
+  .hud{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+  .hud .box{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:700;font-variant-numeric:tabular-nums}
+  .hud .box span{color:var(--acc)}
+  .progress{height:8px;background:var(--panel2);border-radius:999px;overflow:hidden;margin:12px 0 4px}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),#4a9bff);width:100%}
+  .feedback{margin-top:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);display:none}
+  .feedback.show{display:block}
+  .feedback.ok{border-color:var(--ok)}
+  .feedback.err{border-color:var(--err)}
+  .feedback b{color:#fff}
+
+  .cards{display:grid;gap:10px}
+  @media(min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+  .pair{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px;
+        cursor:pointer;text-align:center;font-weight:800;font-size:1.05rem;font-variant-numeric:tabular-nums;
+        min-height:52px;display:flex;align-items:center;justify-content:center}
+  .pair:hover{border-color:var(--acc)}
+  .pair.sel{border-color:var(--acc);background:#28325a}
+  .pair.done{opacity:.35;border-color:var(--ok);cursor:default}
+  .pair.good{background:rgba(61,220,132,.2);border-color:var(--ok)}
+  .pair.bad{background:rgba(255,93,108,.2);border-color:var(--err);animation:shake .35s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .coltitle{font-weight:700;color:#cbd7f2;text-align:center;margin-bottom:6px}
+
+  details{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-top:10px}
+  summary{cursor:pointer;font-weight:700}
+  code{background:#0b1020;padding:2px 6px;border-radius:6px;color:#ffd479;font-size:.92em}
+  .formula{font-size:1.12rem;font-weight:800;letter-spacing:.3px;margin:4px 0 8px}
+  .idcard{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+  .idverify{font-variant-numeric:tabular-nums;font-size:.92rem;color:var(--muted);margin-top:6px}
+  .badge{font-size:.75rem;font-weight:800;border-radius:999px;padding:2px 9px;margin-left:8px}
+  .badge.ok{background:rgba(61,220,132,.18);color:var(--ok)}
+  .badge.no{background:rgba(255,159,67,.18);color:var(--tan)}
+
+  .kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font-size:.8rem;background:var(--panel2)}
+  footer{color:var(--muted);font-size:.82rem;text-align:center;padding:24px 0 40px;border-top:1px solid var(--line);margin-top:20px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="bar">
+      <div class="logo"><span class="s">sen</span> · <span class="c">cos</span> · <span class="t">tan</span> — Círculo Trigonométrico</div>
+      <div class="spacer"></div>
+      <button class="iconbtn" id="soundBtn" title="Sonido on/off">🔊</button>
+    </div>
+    <nav id="nav">
+      <button data-mode="aprende" class="active">📘 Aprende</button>
+      <button data-mode="laboratorio">🧪 Laboratorio</button>
+      <button data-mode="graficas">📈 Gráficas</button>
+      <button data-mode="identidades">🧮 Identidades</button>
+      <button data-mode="practica">🎯 Práctica</button>
+      <button data-mode="parejas">🃏 Parejas</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+  <!-- ============================= APRENDE ============================= -->
+  <section class="screen active" id="s-aprende">
+    <h2>📘 Aprende la lógica (no de memoria)</h2>
+    <p class="muted">Todo sale del <b>círculo unitario</b> (radio = 1) y de dos <b>triángulos especiales</b>. Si entiendes estos 3 dibujos, los valores salen solos.</p>
+
+    <div class="grid two">
+      <div class="card">
+        <h3>1) El círculo unitario</h3>
+        <p>Tomas un punto sobre la circunferencia de radio 1, formando un ángulo <b>θ</b> con el eje X. Sus coordenadas <b>son</b>:</p>
+        <p class="formula"><span style="color:var(--cos)">x = cos θ</span> &nbsp;·&nbsp; <span style="color:var(--sin)">y = sen θ</span></p>
+        <p>Es decir:</p>
+        <ul>
+          <li><b style="color:var(--sin)">sen θ</b> = cuánto <b>sube</b> el punto (altura / cateto opuesto).</li>
+          <li><b style="color:var(--cos)">cos θ</b> = cuánto <b>avanza</b> el punto (base / cateto contiguo).</li>
+          <li><b style="color:var(--tan)">tan θ</b> = la <b>inclinación</b> = altura / base = sen θ / cos θ.</li>
+        </ul>
+        <p class="muted">Aquí no hay que memorizar: si recuerdas que el radio mide 1, todo lo demás se lee del dibujo. Pruébalo en <b>🧪 Laboratorio</b>.</p>
+      </div>
+
+      <div class="card">
+        <h3>2) Los dos triángulos especiales</h3>
+        <p class="muted">De aquí salen TODOS los valores notables. (Recuerda SOH·CAH·TOA: sen = opuesta/hipotenusa, cos = contigua/hipotenusa, tan = opuesta/contigua.)</p>
+
+        <div class="grid two" style="gap:10px">
+          <div style="text-align:center">
+            <svg viewBox="0 0 200 170" width="100%" style="max-width:230px">
+              <polygon points="30,140 30,40 170,140" fill="rgba(74,155,255,.12)" stroke="var(--cos)" stroke-width="2"/>
+              <text x="24" y="95" fill="var(--cos)" font-size="14" text-anchor="end">1</text>
+              <text x="100" y="158" fill="var(--cos)" font-size="14" text-anchor="middle">1</text>
+              <text x="110" y="80" fill="#fff" font-size="14">√2</text>
+              <text x="46" y="134" font-size="13" fill="var(--text)">45°</text>
+              <text x="140" y="128" font-size="13" fill="var(--text)">45°</text>
+            </svg>
+            <div class="muted" style="font-size:.85rem">45–45–90 → lados <code>1, 1, √2</code></div>
+            <div style="font-size:.9rem">sen 45° = cos 45° = 1/√2 = <b>√2/2</b></div>
+            <div style="font-size:.9rem">tan 45° = <b>1</b></div>
+          </div>
+          <div style="text-align:center">
+            <svg viewBox="0 0 200 170" width="100%" style="max-width:230px">
+              <polygon points="30,140 30,40 170,140" fill="rgba(61,220,132,.12)" stroke="var(--sin)" stroke-width="2"/>
+              <text x="24" y="95" fill="var(--sin)" font-size="14" text-anchor="end">1</text>
+              <text x="100" y="158" fill="var(--sin)" font-size="14" text-anchor="middle">√3</text>
+              <text x="105" y="78" fill="#fff" font-size="14">2</text>
+              <text x="42" y="132" font-size="13" fill="var(--text)">60°</text>
+              <text x="138" y="130" font-size="13" fill="var(--text)">30°</text>
+            </svg>
+            <div class="muted" style="font-size:.85rem">30–60–90 → lados <code>1, √3, 2</code></div>
+            <div style="font-size:.9rem">sen 30° = <b>1/2</b> · sen 60° = <b>√3/2</b></div>
+            <div style="font-size:.9rem">cos 30° = <b>√3/2</b> · cos 60° = <b>1/2</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>3) El patrón √n/2 (truco de memoria)</h3>
+      <p>Escribe el seno de 0°, 30°, 45°, 60°, 90° como <code>√0/2, √1/2, √2/2, √3/2, √4/2</code>:</p>
+      <div class="scrollx">
+        <table>
+          <tr><th>θ</th><th>0°</th><th>30°</th><th>45°</th><th>60°</th><th>90°</th></tr>
+          <tr><th style="color:var(--sin)">sen</th>
+            <td class="s">√0/2 = 0</td><td class="s">√1/2 = 1/2</td><td class="s">√2/2</td><td class="s">√3/2</td><td class="s">√4/2 = 1</td></tr>
+          <tr><th style="color:var(--cos)">cos</th>
+            <td class="c">1</td><td class="c">√3/2</td><td class="c">√2/2</td><td class="c">1/2</td><td class="c">0</td></tr>
+          <tr><th style="color:var(--tan)">tan</th>
+            <td class="t">0</td><td class="t">√3/3</td><td class="t">1</td><td class="t">√3</td><td class="t">∄ (indef.)</td></tr>
+        </table>
+      </div>
+      <p class="muted">El coseno es la misma fila <b>al revés</b>. La tangente es <code>sen/cos</code>.</p>
+    </div>
+
+    <div class="card">
+      <h3>4) El resto del círculo: solo cambian los SIGNOS</h3>
+      <p>Para cualquier ángulo buscas su <b>ángulo de referencia</b> (el ángulo agudo que forma con el eje X) y usas los valores de la tabla. Después aplicas el signo según el cuadrante:</p>
+      <div class="scrollx">
+        <table>
+          <tr><th>Cuadrante</th><th>Rango</th><th style="color:var(--sin)">sen</th><th style="color:var(--cos)">cos</th><th style="color:var(--tan)">tan</th></tr>
+          <tr><td>I</td><td>0°–90°</td><td class="s">+</td><td class="c">+</td><td class="t">+</td></tr>
+          <tr><td>II</td><td>90°–180°</td><td class="s">+</td><td class="c">−</td><td class="t">−</td></tr>
+          <tr><td>III</td><td>180°–270°</td><td class="s">−</td><td class="c">−</td><td class="t">+</td></tr>
+          <tr><td>IV</td><td>270°–360°</td><td class="s">−</td><td class="c">+</td><td class="t">−</td></tr>
+        </table>
+      </div>
+      <p class="muted">Truco en inglés: <b>ASTC</b> — “<b>A</b>ll <b>S</b>tudents <b>T</b>ake <b>C</b>alculus”. En español: <b>T</b>odos (I) / <b>S</b>en (II) / <b>T</b>an (III) / <b>C</b>os (IV).</p>
+      <p><b>Ejemplo:</b> 150° está en el cuadrante II, su referencia es 30°. Entonces sen 150° = +1/2, cos 150° = −√3/2, tan 150° = −√3/3.</p>
+    </div>
+
+    <div class="card">
+      <h3>5) Grados ↔ radianes</h3>
+      <p>Media vuelta = 180° = π radianes. Para convertir: multiplica por <code>π/180</code> (a radianes) o por <code>180/π</code> (a grados).</p>
+      <p>Los notables: 30°=π/6 · 45°=π/4 · 60°=π/3 · 90°=π/2 · 180°=π · 270°=3π/2 · 360°=2π.</p>
+    </div>
+
+    <p class="muted">¿Listo? Ve a <a href="#" data-goto="laboratorio">🧪 Laboratorio</a> para jugar con el círculo, y a <a href="#" data-goto="identidades">🧮 Identidades</a> para las fórmulas que se usan en Cálculo.</p>
+  </section>
+
+  <!-- ============================= LABORATORIO ============================= -->
+  <section class="screen" id="s-laboratorio">
+    <h2>🧪 Laboratorio del círculo unitario</h2>
+    <p class="muted">Arrastra el punto verde sobre la circunferencia (o usa el deslizador). Mira cómo <b style="color:var(--sin)">sen</b>, <b style="color:var(--cos)">cos</b> y <b style="color:var(--tan)">tan</b> son segmentos reales.</p>
+
+    <div class="grid lab">
+      <div class="card" style="padding:10px">
+        <canvas id="circleCv" width="520" height="520"></canvas>
+        <div class="legend">
+          <span class="ls"><i></i>sen θ (altura, cateto opuesto)</span>
+          <span class="lc"><i></i>cos θ (base, cateto contiguo)</span>
+          <span class="lt"><i></i>tan θ (recta tangente x = 1)</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="bigangle" id="labAngle">45°</div>
+          <div class="muted" id="labRad">= π/4 rad</div>
+          <div class="readout" style="margin-top:10px">
+            <div class="rowline"><span class="k" style="color:var(--sin)">sen θ</span><span class="v" id="labSin">0.707</span></div>
+            <div class="rowline"><span class="k" style="color:var(--cos)">cos θ</span><span class="v" id="labCos">0.707</span></div>
+            <div class="rowline"><span class="k" style="color:var(--tan)">tan θ</span><span class="v" id="labTan">1</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <input type="range" id="labSlider" min="0" max="360" step="0.5" value="45">
+          <div class="controls">
+            <label class="chk"><input type="checkbox" id="labSnap" checked> Enganchar a ángulos notables</label>
+            <label class="chk"><input type="checkbox" id="labTanChk" checked> Mostrar tangente</label>
+          </div>
+          <div class="controls">
+            <button class="btn" id="labPrev">← −15°</button>
+            <button class="btn" id="labNext">+15° →</button>
+            <button class="btn" id="labPlay">▶ Animar</button>
+          </div>
+          <p class="muted" style="font-size:.85rem;margin-bottom:0">Atajos: <span class="kbd">←</span> <span class="kbd">→</span> ajustan el ángulo cuando esta sección está abierta.</p>
+        </div>
+        <div class="card">
+          <div class="muted" style="font-size:.88rem">Cuadrante <b id="labQuad">I</b> · referencia <b id="labRef">45°</b> · signos: <span id="labSigns"></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= GRÁFICAS ============================= -->
+  <section class="screen" id="s-graficas">
+    <h2>📈 Las gráficas y el círculo</h2>
+    <p class="muted">Mueve el ángulo y observa que la <b style="color:var(--sin)">altura del punto del círculo</b> es exactamente el <b style="color:var(--sin)">valor de la curva</b>.</p>
+
+    <div class="grid" style="grid-template-columns:1fr">
+      <div class="card" style="padding:10px">
+        <canvas id="graphCv" width="820" height="360"></canvas>
+      </div>
+    </div>
+    <div class="grid two">
+      <div class="card" style="padding:10px">
+        <canvas id="miniCv" width="260" height="260" style="max-width:260px;margin:0 auto"></canvas>
+      </div>
+      <div class="card">
+        <input type="range" id="grSlider" min="0" max="360" step="1" value="45">
+        <div class="bigangle" id="grAngle">45° = π/4</div>
+        <div class="readout" style="margin-top:8px">
+          <div class="rowline"><span class="k" style="color:var(--sin)">sen</span><span class="v" id="grSin">0.707</span></div>
+          <div class="rowline"><span class="k" style="color:var(--cos)">cos</span><span class="v" id="grCos">0.707</span></div>
+          <div class="rowline"><span class="k" style="color:var(--tan)">tan</span><span class="v" id="grTan">1</span></div>
+        </div>
+        <div class="controls">
+          <label class="chk"><input type="checkbox" id="gSin" checked> <span style="color:var(--sin)">sen</span></label>
+          <label class="chk"><input type="checkbox" id="gCos" checked> <span style="color:var(--cos)">cos</span></label>
+          <label class="chk"><input type="checkbox" id="gTan" checked> <span style="color:var(--tan)">tan</span></label>
+        </div>
+        <div class="controls">
+          <button class="btn" id="grPlay">▶ Reproducir</button>
+          <button class="btn" id="grStop">⏸ Parar</button>
+        </div>
+        <p class="muted" style="font-size:.85rem;margin-bottom:0">Eje x en radianes: 0, π/2, π, 3π/2, 2π. Periodos: sen y cos = 2π; tan = π. La tangente tiene asíntotas donde cos = 0.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= IDENTIDADES ============================= -->
+  <section class="screen" id="s-identidades">
+    <h2>🧮 Identidades notables (con prueba en vivo)</h2>
+    <p class="muted">Cada tarjeta calcula los <b>dos lados</b> de la igualdad con los ángulos que elijas: si siempre dan lo mismo, es que la identidad es cierta. ¡Eso es entenderla!</p>
+
+    <div class="card">
+      <div class="controls" style="gap:22px;align-items:flex-start">
+        <div style="flex:1;min-width:220px">
+          <label class="chk">Ángulo <b>a</b> = <span id="idaVal">40°</span></label>
+          <input type="range" id="idaRange" min="0" max="360" step="1" value="40">
+        </div>
+        <div style="flex:1;min-width:220px">
+          <label class="chk">Ángulo <b>b</b> = <span id="idbVal">25°</span> <span class="muted">(solo para suma/resta)</span></label>
+          <input type="range" id="idbRange" min="0" max="360" step="1" value="25">
+        </div>
+      </div>
+    </div>
+
+    <div id="idGroups"></div>
+
+    <div class="card">
+      <h3>📎 Bonus: teoremas del seno y del coseno</h3>
+      <p class="muted">Se usan para resolver triángulos que <b>no</b> son rectángulos (a, b, c = lados; A, B, C = ángulos opuestos).</p>
+      <div class="idcard">
+        <div class="formula">a / sen A = b / sen B = c / sen C</div>
+        <p class="muted" style="margin:0">Teorema del seno: útil cuando conoces un lado y su ángulo opuesto.</p>
+      </div>
+      <div class="idcard">
+        <div class="formula">a² = b² + c² − 2·b·c·cos A</div>
+        <p class="muted" style="margin:0">Teorema del coseno: es el teorema de Pitágoras corregido cuando el ángulo no es 90° (si A = 90°, cos A = 0 y queda a² = b² + c²).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= PRÁCTICA ============================= -->
+  <section class="screen" id="s-practica">
+    <h2>🎯 Práctica con puntaje</h2>
+
+    <div id="quizStart" class="card">
+      <p>Elige dificultad y demuestra lo que sabes. Tienes <b>60 segundos</b>. Cada acierto suma puntos y la racha multiplica.</p>
+      <div class="controls">
+        <button class="btn primary" data-diff="facil">Fácil · 0°–90°</button>
+        <button class="btn" data-diff="medio">Medio · círculo completo</button>
+        <button class="btn" data-diff="dificil">Difícil · radianes + identidades</button>
+      </div>
+      <p class="muted" style="margin-bottom:0">Récord guardado: <b id="bestScore">0</b> puntos.</p>
+    </div>
+
+    <div id="quizGame" class="card" style="display:none">
+      <div class="hud">
+        <div class="box">Puntos <span id="qScore">0</span></div>
+        <div class="box">Racha <span id="qStreak">0</span></div>
+        <div class="box">Tiempo <span id="qTime">60</span>s</div>
+        <div class="spacer"></div>
+        <button class="btn" id="qQuit">Salir</button>
+      </div>
+      <div class="progress"><i id="qBar"></i></div>
+      <h3 id="qPrompt" style="min-height:2.4em">—</h3>
+      <div id="qOptions"></div>
+      <div class="feedback" id="qFeedback"></div>
+      <div class="controls">
+        <button class="btn primary" id="qNext" style="display:none">Siguiente →</button>
+      </div>
+    </div>
+
+    <div id="quizOver" class="card" style="display:none">
+      <h3>¡Terminado! 🎉</h3>
+      <p>Puntos: <b id="qFinal">0</b> · Aciertos: <b id="qHits">0</b> · Fallos: <b id="qMiss">0</b> · Mejor racha: <b id="qBestStreak">0</b></p>
+      <p id="qMsg" class="muted"></p>
+      <div class="controls">
+        <button class="btn primary" id="qAgain">Jugar otra vez</button>
+        <button class="btn" id="qMenu">Cambiar dificultad</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= PAREJAS ============================= -->
+  <section class="screen" id="s-parejas">
+    <h2>🃏 Parejas: une cada ángulo con su valor</h2>
+    <div class="card">
+      <p>Elige un mazo, haz clic en un <b>ángulo</b> y luego en su <b>valor</b> correcto.</p>
+      <div class="controls">
+        <button class="btn" data-deck="sen">Mazo sen</button>
+        <button class="btn" data-deck="cos">Mazo cos</button>
+        <button class="btn" data-deck="tan">Mazo tan</button>
+        <button class="btn" data-deck="rad">Mazo radianes</button>
+      </div>
+    </div>
+
+    <div class="card" id="pairsCard" style="display:none">
+      <div class="hud">
+        <div class="box">Parejas <span id="pFound">0</span>/<span id="pTotal">0</span></div>
+        <div class="box">Intentos <span id="pMoves">0</span></div>
+        <div class="box">Tiempo <span id="pTime">0</span>s</div>
+        <div class="spacer"></div>
+        <button class="btn" id="pReset">Reiniciar</button>
+      </div>
+      <div class="grid two">
+        <div>
+          <div class="coltitle">Ángulo</div>
+          <div class="cards" id="pLeft"></div>
+        </div>
+        <div>
+          <div class="coltitle">Valor</div>
+          <div class="cards" id="pRight"></div>
+        </div>
+      </div>
+      <div class="feedback" id="pFeedback"></div>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer>
+  Hecho para aprender trigonometría con lógica · Ángulos notables, círculo unitario, gráficas e identidades.
+</footer>
+
+<script>
+"use strict";
+/* =========================================================================
+   0. DATOS: ángulos notables con valores exactos
+   ========================================================================= */
+const RAD_MAP = {0:'0',30:'π/6',45:'π/4',60:'π/3',90:'π/2',120:'2π/3',135:'3π/4',
+  150:'5π/6',180:'π',210:'7π/6',225:'5π/4',240:'4π/3',270:'3π/2',300:'5π/3',
+  315:'7π/4',330:'11π/6',360:'2π'};
+
+// Valores exactos del primer cuadrante (la base de todo)
+const BASE = {
+  0:  {sin:'0',    cos:'1',    tan:'0'},
+  30: {sin:'1/2',  cos:'√3/2', tan:'√3/3'},
+  45: {sin:'√2/2', cos:'√2/2', tan:'1'},
+  60: {sin:'√3/2', cos:'1/2',  tan:'√3'},
+  90: {sin:'1',    cos:'0',    tan:'—'}
+};
+const ANGLE_LIST = [0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330,360];
+
+function refAngle(d){ d = ((d%360)+360)%360; if(d<=90) return d; if(d<=180) return 180-d; if(d<=270) return d-180; return 360-d; }
+function quadrantOf(d){ d = ((d%360)+360)%360; if(d===0||d<90) return 1; if(d<=180) { if(d===90) return 1; return 2; } const x=d; if(x===180) return 2; if(x<270) return 3; if(x===270) return 3; return 4; }
+
+function buildSpecial(deg){
+  const rad = deg*Math.PI/180;
+  const sv = Math.sin(rad), cv = Math.cos(rad), tv = Math.tan(rad);
+  const b = BASE[refAngle(deg)];
+  const fmt = (s,v)=>{
+    if(s==='—') return '—';
+    if(s==='0' || Math.abs(v)<1e-9) return '0';
+    return (v<0?'−':'') + s;
+  };
+  return {
+    deg, radStr:RAD_MAP[deg]||'', sin:fmt(b.sin,sv), cos:fmt(b.cos,cv), tan:fmt(b.tan,tv),
+    sinRaw:b.sin, cosRaw:b.cos, tanRaw:b.tan, sv, cv, tv
+  };
+}
+const SPECIAL = ANGLE_LIST.map(buildSpecial);
+const SPECIAL_NOSNAP = SPECIAL.filter(s=>s.deg<360); // 0..330
+
+function specialAt(deg){
+  deg = ((deg%360)+360)%360;
+  return SPECIAL_NOSNAP.find(s=>s.deg===deg) || null;
+}
+function nearestSpecial(deg){
+  deg = ((deg%360)+360)%360;
+  let best=SPECIAL_NOSNAP[0], bd=999;
+  for(const s of SPECIAL_NOSNAP){ let d=Math.abs(s.deg-deg); d=Math.min(d,360-d); if(d<bd){bd=d;best=s;} }
+  return best;
+}
+function quadrantName(d){
+  d=((d%360)+360)%360;
+  const q=quadrantOf(d);
+  return ['I','II','III','IV'][q-1]||'—';
+}
+
+/* =========================================================================
+   1. SONIDO (Web Audio API, sin archivos externos)
+   ========================================================================= */
+const Sound = (()=>{
+  let ctx=null;
+  let enabled = localStorage.getItem('sct_sound')!=='off';
+  function ac(){ if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)(); return ctx; }
+  function beep(freq,dur,type,vol){
+    if(!enabled) return;
+    try{
+      const a=ac(); if(a.state==='suspended') a.resume();
+      const o=a.createOscillator(), g=a.createGain();
+      o.type=type||'sine'; o.frequency.value=freq;
+      o.connect(g); g.connect(a.destination);
+      const t=a.currentTime;
+      g.gain.setValueAtTime(vol||0.16,t);
+      g.gain.exponentialRampToValueAtTime(0.0008,t+dur);
+      o.start(t); o.stop(t+dur+0.02);
+    }catch(e){}
+  }
+  return {
+    unlock(){ try{ const a=ac(); if(a.state==='suspended') a.resume(); }catch(e){} },
+    click(){ beep(520,.06,'triangle',.10); },
+    ok(){ beep(660,.09,'sine',.16); setTimeout(()=>beep(990,.13,'sine',.16),85); },
+    err(){ beep(150,.26,'sawtooth',.13); },
+    win(){ [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.16,'sine',.16),i*105)); },
+    tick(){ beep(430,.045,'square',.07); },
+    get enabled(){ return enabled; },
+    toggle(){ enabled=!enabled; localStorage.setItem('sct_sound',enabled?'on':'off'); return enabled; }
+  };
+})();
+const soundBtn = document.getElementById('soundBtn');
+function renderSoundBtn(){ soundBtn.textContent = Sound.enabled ? '🔊' : '🔇'; }
+renderSoundBtn();
+soundBtn.addEventListener('click',()=>{ Sound.toggle(); renderSoundBtn(); if(Sound.enabled) Sound.click(); });
+
+/* =========================================================================
+   2. NAVEGACIÓN
+   ========================================================================= */
+// El AudioContext necesita un gesto del usuario: lo "despertamos" en el primer toque.
+window.addEventListener('pointerdown',()=>{ Sound.unlock(); },{once:true});
+
+const nav = document.getElementById('nav');
+function show(mode){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+mode).classList.add('active');
+  nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b.dataset.mode===mode));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(mode==='laboratorio') drawCircle();
+  if(mode==='graficas'){ drawMini(); drawGraph(); }
+}
+nav.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-mode]'); if(!b) return;
+  Sound.click(); show(b.dataset.mode);
+});
+document.querySelectorAll('[data-goto]').forEach(a=>a.addEventListener('click',e=>{
+  e.preventDefault(); Sound.click(); show(a.dataset.goto);
+}));
+
+/* =========================================================================
+   3. CANVAS helpers
+   ========================================================================= */
+function ctxOf(cv){
+  const dpr = window.devicePixelRatio||1;
+  const w = cv.width, h = cv.height;
+  // Guardamos dimensiones lógicas y aumentamos resolución interna
+  if(!cv.dataset.scaled){
+    cv.width = w*dpr; cv.height = h*dpr;
+    cv.dataset.scaled = '1';
+    cv.dataset.lw = w; cv.dataset.lh = h;
+  }
+  const c = cv.getContext('2d');
+  c.setTransform(dpr,0,0,dpr,0,0);
+  return {c, w:+cv.dataset.lw, h:+cv.dataset.lh};
+}
+
+/* =========================================================================
+   4. LABORATORIO: círculo unitario
+   ========================================================================= */
+const lab = { deg:45, snap:true, showTan:true, playing:false, raf:0 };
+const circleCv = document.getElementById('circleCv');
+const circleCtx = ctxOf(circleCv);
+const CW = circleCtx.w, CH = circleCtx.h, CX = CW/2, CY = CH/2, R = Math.min(CW,CH)*0.34;
+
+function drawCircle(){
+  const {c} = circleCtx;
+  c.clearRect(0,0,CW,CH);
+
+  // Fondo cuadriculado suave
+  c.strokeStyle='rgba(90,120,180,.10)'; c.lineWidth=1;
+  for(let x=-4;x<=4;x++){ c.beginPath(); c.moveTo(CX+x*R/1.0,CY-4*R); c.lineTo(CX+x*R/1.0,CY+4*R); c.stroke(); }
+  for(let y=-4;y<=4;y++){ c.beginPath(); c.moveTo(CX-4*R,CY+y*R/1.0); c.lineTo(CX+4*R,CY+y*R/1.0); c.stroke(); }
+
+  // Ejes
+  c.strokeStyle='rgba(160,180,220,.55)'; c.lineWidth=1.6;
+  c.beginPath(); c.moveTo(CX-1.25*R,CY); c.lineTo(CX+1.25*R,CY); c.stroke();
+  c.beginPath(); c.moveTo(CX,CY-1.25*R); c.lineTo(CX,CY+1.25*R); c.stroke();
+  c.fillStyle='rgba(200,215,240,.8)'; c.font='13px system-ui';
+  c.fillText('x', CX+1.25*R-6, CY+18); c.fillText('y', CX+10, CY-1.25*R+8);
+
+  // Circunferencia unidad
+  c.strokeStyle='rgba(200,215,240,.6)'; c.lineWidth=1.6;
+  c.beginPath(); c.arc(CX,CY,R,0,Math.PI*2); c.stroke();
+
+  // Puntos de ángulos notables
+  for(const s of SPECIAL_NOSNAP){
+    const a=s.deg*Math.PI/180, px=CX+R*Math.cos(a), py=CY-R*Math.sin(a);
+    c.fillStyle='rgba(139,124,255,.9)';
+    c.beginPath(); c.arc(px,py,2.6,0,Math.PI*2); c.fill();
+    const lx=CX+(R+22)*Math.cos(a), ly=CY-(R+22)*Math.sin(a);
+    c.fillStyle='rgba(147,163,196,.95)'; c.font='11px system-ui'; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText(s.deg+'°', lx, ly);
+  }
+  c.textAlign='start'; c.textBaseline='alphabetic';
+
+  const a = lab.deg*Math.PI/180;
+  const px = CX+R*Math.cos(a), py = CY-R*Math.sin(a);
+  const tanV = Math.tan(a);
+
+  // Recta tangente x = 1
+  if(lab.showTan){
+    c.strokeStyle='rgba(255,159,67,.35)'; c.setLineDash([5,5]); c.lineWidth=1.3;
+    c.beginPath(); c.moveTo(CX+R, CY-1.3*R); c.lineTo(CX+R, CY+1.3*R); c.stroke();
+    c.setLineDash([]);
+  }
+
+  // Triángulo relleno
+  c.fillStyle='rgba(139,124,255,.10)';
+  c.beginPath(); c.moveTo(CX,CY); c.lineTo(px,CY); c.lineTo(px,py); c.closePath(); c.fill();
+
+  // Segmento cos (azul): del centro al pie
+  c.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--cos').trim();
+  c.lineWidth=6; c.lineCap='round';
+  c.beginPath(); c.moveTo(CX,CY); c.lineTo(px,CY); c.stroke();
+
+  // Segmento sin (verde): del pie al punto
+  c.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--sin').trim();
+  c.beginPath(); c.moveTo(px,CY); c.lineTo(px,py); c.stroke();
+
+  // Radio (hipotenusa)
+  c.strokeStyle='rgba(255,255,255,.85)'; c.lineWidth=2.4;
+  c.beginPath(); c.moveTo(CX,CY); c.lineTo(px,py); c.stroke();
+
+  // Segmento tan (naranja) sobre la recta x = 1
+  if(lab.showTan && Math.abs(tanV)<3.2){
+    c.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--tan').trim();
+    c.lineWidth=6;
+    c.beginPath(); c.moveTo(CX+R,CY); c.lineTo(CX+R, CY-R*tanV); c.stroke();
+    // punto de corte
+    c.fillStyle='#ffd479';
+    c.beginPath(); c.arc(CX+R, CY-R*tanV, 4, 0, Math.PI*2); c.fill();
+  }
+
+  // Arco del ángulo
+  c.strokeStyle='rgba(139,124,255,.9)'; c.lineWidth=2;
+  c.beginPath(); c.arc(CX,CY,42, 0, -a, true); c.stroke();
+
+  // Punto móvil
+  c.fillStyle='#fff'; c.strokeStyle='#8b7cff'; c.lineWidth=3;
+  c.beginPath(); c.arc(px,py,8,0,Math.PI*2); c.fill(); c.stroke();
+
+  c.lineCap='butt';
+  updateLabReadout();
+}
+
+function fmtNum(x){
+  if(!isFinite(x)) return '∄';
+  if(Math.abs(x)>1e6) return '±∞';
+  return (Math.round(x*1000)/1000).toFixed(3);
+}
+function updateLabReadout(){
+  const deg = lab.deg;
+  const a = deg*Math.PI/180;
+  const sp = specialAt(deg);
+  document.getElementById('labAngle').textContent = (Math.round(deg*10)/10)+'°';
+  document.getElementById('labRad').textContent = sp ? ('= '+sp.radStr+' rad') : ('= '+fmtNum(a)+' rad');
+  document.getElementById('labSin').innerHTML = sp ? (sp.sin+' <span class="muted">≈ '+fmtNum(Math.sin(a))+'</span>') : fmtNum(Math.sin(a));
+  document.getElementById('labCos').innerHTML = sp ? (sp.cos+' <span class="muted">≈ '+fmtNum(Math.cos(a))+'</span>') : fmtNum(Math.cos(a));
+  const tv = Math.tan(a);
+  document.getElementById('labTan').innerHTML = sp ? (sp.tan==='—' ? '<b>∄ indefinida</b> <span class="muted">(cos = 0)</span>' : sp.tan+' <span class="muted">≈ '+fmtNum(tv)+'</span>') : fmtNum(tv);
+  document.getElementById('labQuad').textContent = quadrantName(deg);
+  document.getElementById('labRef').textContent = refAngle(deg)+'°';
+  const s1 = Math.sin(a)>=0?'+':'−', c1=Math.cos(a)>=0?'+':'−', t1=Math.tan(a)>=0?'+':'−';
+  document.getElementById('labSigns').innerHTML =
+    '<span style="color:var(--sin)">sen '+s1+'</span> · <span style="color:var(--cos)">cos '+c1+'</span> · <span style="color:var(--tan)">tan '+t1+'</span>';
+  document.getElementById('labSlider').value = deg;
+}
+function setLab(deg, fromSlider){
+  deg = ((deg%360)+360)%360;
+  if(lab.snap) deg = nearestSpecial(deg).deg;
+  lab.deg = deg;
+  if(!fromSlider) document.getElementById('labSlider').value = deg;
+  drawCircle();
+}
+document.getElementById('labSlider').addEventListener('input',e=>{ setLab(parseFloat(e.target.value), true); });
+document.getElementById('labSnap').addEventListener('change',e=>{ lab.snap=e.target.checked; setLab(lab.deg); });
+document.getElementById('labTanChk').addEventListener('change',e=>{ lab.showTan=e.target.checked; drawCircle(); });
+document.getElementById('labPrev').addEventListener('click',()=>{ Sound.click(); setLab(lab.deg-15); });
+document.getElementById('labNext').addEventListener('click',()=>{ Sound.click(); setLab(lab.deg+15); });
+document.getElementById('labPlay').addEventListener('click',()=>{
+  lab.playing=!lab.playing;
+  document.getElementById('labPlay').textContent = lab.playing?'⏸ Pausar':'▶ Animar';
+  if(lab.playing){
+    const step=()=>{ if(!lab.playing) return; lab.snap=false; document.getElementById('labSnap').checked=false;
+      setLab(lab.deg+0.8); lab.raf=requestAnimationFrame(step); };
+    lab.raf=requestAnimationFrame(step);
+  } else cancelAnimationFrame(lab.raf);
+});
+// Arrastrar sobre el círculo
+(function(){
+  let dragging=false;
+  function pointDeg(ev){
+    const rect=circleCv.getBoundingClientRect();
+    const x=(ev.clientX-rect.left)*(CW/rect.width);
+    const y=(ev.clientY-rect.top)*(CH/rect.height);
+    let a=Math.atan2(CY-y, x-CX); // radianes, CCW
+    let deg=a*180/Math.PI; if(deg<0) deg+=360; return deg;
+  }
+  circleCv.addEventListener('pointerdown',ev=>{ dragging=true; circleCv.setPointerCapture(ev.pointerId); if(lab.playing){lab.playing=false;document.getElementById('labPlay').textContent='▶ Animar';} setLab(pointDeg(ev)); });
+  circleCv.addEventListener('pointermove',ev=>{ if(dragging) setLab(pointDeg(ev)); });
+  circleCv.addEventListener('pointerup',()=>{ dragging=false; });
+  circleCv.addEventListener('pointercancel',()=>{ dragging=false; });
+})();
+window.addEventListener('keydown',ev=>{
+  if(!document.getElementById('s-laboratorio').classList.contains('active')) return;
+  if(ev.key==='ArrowRight'){ setLab(lab.deg+ (lab.snap?15:1)); Sound.click(); }
+  if(ev.key==='ArrowLeft'){ setLab(lab.deg- (lab.snap?15:1)); Sound.click(); }
+});
+
+/* =========================================================================
+   5. GRÁFICAS
+   ========================================================================= */
+const gr = { deg:45, playing:false, raf:0, sin:true, cos:true, tan:true };
+const graphCtx = ctxOf(document.getElementById('graphCv'));
+const miniCtx  = ctxOf(document.getElementById('miniCv'));
+
+function graphGeom(){
+  const w=graphCtx.w, h=graphCtx.h, padL=56, padR=18, padT=18, padB=34;
+  const x0=0, x1=2*Math.PI, y0=-1.55, y1=1.55;
+  return { w,h,padL,padR,padT,padB,x0,x1,y0,y1,
+    mx:x=>padL+((x-x0)/(x1-x0))*(w-padL-padR),
+    my:y=>h-padB-((y-y0)/(y1-y0))*(h-padT-padB) };
+}
+function drawGraph(){
+  const {c}=graphCtx, g=graphGeom();
+  c.clearRect(0,0,g.w,g.h);
+  // Rejilla
+  c.strokeStyle='rgba(90,120,180,.14)'; c.lineWidth=1;
+  for(let k=0;k<=8;k++){ const x=g.x0+(g.x1-g.x0)*k/8; const X=g.mx(x); c.beginPath(); c.moveTo(X,g.my(g.y0)); c.lineTo(X,g.my(g.y1)); c.stroke(); }
+  for(let k=-1;k<=1;k++){ const Y=g.my(k); c.beginPath(); c.moveTo(g.mx(g.x0),Y); c.lineTo(g.mx(g.x1),Y); c.stroke(); }
+  // Ejes
+  c.strokeStyle='rgba(170,190,225,.6)'; c.lineWidth=1.6;
+  c.beginPath(); c.moveTo(g.mx(g.x0),g.my(0)); c.lineTo(g.mx(g.x1),g.my(0)); c.stroke();
+  c.beginPath(); c.moveTo(g.mx(g.x0),g.my(g.y0)); c.lineTo(g.mx(g.x0),g.my(g.y1)); c.stroke();
+  // Etiquetas eje X
+  c.fillStyle='rgba(180,195,225,.9)'; c.font='12px system-ui'; c.textAlign='center';
+  const labels=[[0,'0'],[Math.PI/2,'π/2'],[Math.PI,'π'],[3*Math.PI/2,'3π/2'],[2*Math.PI,'2π']];
+  for(const [x,t] of labels){ c.fillText(t, g.mx(x), g.my(0)+18); }
+  c.textAlign='right';
+  c.fillText('1', g.mx(0)-6, g.my(1)+4); c.fillText('-1', g.mx(0)-6, g.my(-1)+4);
+  c.textAlign='start';
+  c.fillText('y', g.mx(0)-4, 14);
+
+  // Asíntotas de tan
+  if(gr.tan){
+    c.strokeStyle='rgba(255,159,67,.3)'; c.setLineDash([6,6]); c.lineWidth=1.2;
+    [Math.PI/2, 3*Math.PI/2].forEach(x=>{ c.beginPath(); c.moveTo(g.mx(x),g.my(g.y0)); c.lineTo(g.mx(x),g.my(g.y1)); c.stroke(); });
+    c.setLineDash([]);
+  }
+
+  const setStyle=(col,width)=>{ c.strokeStyle=col; c.lineWidth=width; c.lineJoin='round'; };
+  const sinC=getComputedStyle(document.documentElement).getPropertyValue('--sin').trim();
+  const cosC=getComputedStyle(document.documentElement).getPropertyValue('--cos').trim();
+  const tanC=getComputedStyle(document.documentElement).getPropertyValue('--tan').trim();
+
+  function plot(fn,col,width){
+    setStyle(col,width);
+    c.beginPath(); let started=false;
+    for(let px=0; px<=g.w; px++){
+      const x=g.x0+((px-g.padL)/(g.w-g.padL-g.padR))*(g.x1-g.x0);
+      if(px<g.padL||px>g.w-g.padR){ started=false; continue; }
+      const y=fn(x);
+      if(!isFinite(y)||Math.abs(y)>1.55){ started=false; continue; }
+      const X=g.mx(x), Y=g.my(y);
+      if(!started){ c.moveTo(X,Y); started=true; } else c.lineTo(X,Y);
+    }
+    c.stroke();
+  }
+  if(gr.sin) plot(Math.sin,sinC,2.6);
+  if(gr.cos) plot(Math.cos,cosC,2.6);
+  if(gr.tan) plot(Math.tan,tanC,2);
+
+  // Marcador del ángulo actual
+  const a=gr.deg*Math.PI/180;
+  const X=g.mx(a);
+  c.strokeStyle='rgba(255,255,255,.35)'; c.lineWidth=1.4; c.setLineDash([4,4]);
+  c.beginPath(); c.moveTo(X,g.my(g.y0)); c.lineTo(X,g.my(g.y1)); c.stroke(); c.setLineDash([]);
+  const marks=[[Math.sin(a),sinC,gr.sin],[Math.cos(a),cosC,gr.cos],[Math.tan(a),tanC,gr.tan]];
+  for(const [y,col,on] of marks){
+    if(!on||!isFinite(y)||Math.abs(y)>1.55) continue;
+    c.fillStyle=col; c.beginPath(); c.arc(X,g.my(y),5,0,Math.PI*2); c.fill();
+  }
+
+  // Lecturas
+  document.getElementById('grAngle').textContent = Math.round(gr.deg)+'°';
+  document.getElementById('grSin').textContent = fmtNum(Math.sin(a));
+  document.getElementById('grCos').textContent = fmtNum(Math.cos(a));
+  document.getElementById('grTan').textContent = fmtNum(Math.tan(a));
+}
+function drawMini(){
+  const {c}=miniCtx, w=miniCtx.w, h=miniCtx.h;
+  const cx=w/2, cy=h/2, r=Math.min(w,h)*0.34;
+  c.clearRect(0,0,w,h);
+  c.strokeStyle='rgba(170,190,225,.5)'; c.lineWidth=1.4;
+  c.beginPath(); c.moveTo(cx-r*1.2,cy); c.lineTo(cx+r*1.2,cy); c.stroke();
+  c.beginPath(); c.moveTo(cx,cy-r*1.2); c.lineTo(cx,cy+r*1.2); c.stroke();
+  c.strokeStyle='rgba(200,215,240,.6)'; c.lineWidth=1.4;
+  c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.stroke();
+  const a=gr.deg*Math.PI/180, px=cx+r*Math.cos(a), py=cy-r*Math.sin(a);
+  const sinC=getComputedStyle(document.documentElement).getPropertyValue('--sin').trim();
+  const cosC=getComputedStyle(document.documentElement).getPropertyValue('--cos').trim();
+  // cos (horizontal) y sin (vertical)
+  c.strokeStyle=cosC; c.lineWidth=5; c.lineCap='round';
+  c.beginPath(); c.moveTo(cx,cy); c.lineTo(px,cy); c.stroke();
+  c.strokeStyle=sinC;
+  c.beginPath(); c.moveTo(px,cy); c.lineTo(px,py); c.stroke();
+  c.strokeStyle='rgba(255,255,255,.85)'; c.lineWidth=2;
+  c.beginPath(); c.moveTo(cx,cy); c.lineTo(px,py); c.stroke();
+  c.fillStyle='#fff'; c.strokeStyle='#8b7cff'; c.lineWidth=2.5;
+  c.beginPath(); c.arc(px,py,6,0,Math.PI*2); c.fill(); c.stroke();
+  c.lineCap='butt';
+}
+document.getElementById('grSlider').addEventListener('input',e=>{ gr.deg=parseFloat(e.target.value); drawGraph(); drawMini(); });
+['gSin','gCos','gTan'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{
+  const k=id==='gSin'?'sin':id==='gCos'?'cos':'tan'; gr[k]=e.target.checked; drawGraph();
+}));
+document.getElementById('grPlay').addEventListener('click',()=>{
+  if(gr.playing) return; gr.playing=true;
+  document.getElementById('grStop').textContent='⏸ Parar';
+  const step=()=>{ if(!gr.playing) return; gr.deg=(gr.deg+1.2)%360;
+    document.getElementById('grSlider').value=gr.deg; drawGraph(); drawMini();
+    gr.raf=requestAnimationFrame(step); };
+  gr.raf=requestAnimationFrame(step);
+});
+document.getElementById('grStop').addEventListener('click',()=>{ gr.playing=false; cancelAnimationFrame(gr.raf); });
+
+/* =========================================================================
+   6. IDENTIDADES
+   ========================================================================= */
+const D2R=Math.PI/180;
+const S=a=>Math.sin(a*D2R), C=a=>Math.cos(a*D2R), T=a=>Math.tan(a*D2R);
+
+const IDENTIDADES = [
+  { grupo:'Fundamentales',
+    numero:1, nombre:'Identidad pitagórica', tex:'sen²a + cos²a = 1',
+    izq:(a,b)=>S(a)**2+C(a)**2, der:()=>1,
+    pasos:'El punto del círculo unitario es (cos a, sen a). Por Pitágoras, cateto²+cateto²=hipotenusa²: cos²a + sen²a = 1². ¡Es el teorema de Pitágoras aplicado al círculo!' },
+  { grupo:'Fundamentales',
+    numero:2, nombre:'Razón (tangente)', tex:'tan a = sen a / cos a',
+    izq:(a)=>T(a), der:(a)=>S(a)/C(a),
+    pasos:'En el triángulo rectángulo, tan = cateto opuesto / cateto contiguo = (altura)/(base) = sen a / cos a.' },
+  { grupo:'Fundamentales',
+    numero:3, nombre:'Razones recíprocas', tex:'sec a = 1/cos a · csc a = 1/sen a · cot a = 1/tan a',
+    izq:(a)=>1/C(a), der:(a)=>1/C(a),
+    pasos:'La secante, cosecante y cotangente son simplemente los inversos de cos, sen y tan. sec = 1/cos, csc = 1/sen, cot = 1/tan.' },
+  { grupo:'Pitagóricas derivadas',
+    numero:4, nombre:'Con la tangente', tex:'1 + tan²a = sec²a',
+    izq:(a)=>1+T(a)**2, der:(a)=>1/C(a)**2,
+    pasos:'Divide sen²a + cos²a = 1 entre cos²a: (sen²/cos²) + 1 = 1/cos² → tan²a + 1 = sec²a.' },
+  { grupo:'Pitagóricas derivadas',
+    numero:5, nombre:'Con la cotangente', tex:'1 + cot²a = csc²a',
+    izq:(a)=>1+(1/T(a))**2, der:(a)=>1/S(a)**2,
+    pasos:'Divide sen²a + cos²a = 1 entre sen²a: 1 + (cos²/sen²) = 1/sen² → 1 + cot²a = csc²a.' },
+
+  { grupo:'Ángulo suma y diferencia',
+    numero:6, nombre:'Seno de la suma', tex:'sen(a+b) = sen a·cos b + cos a·sen b', needsB:true,
+    izq:(a,b)=>S(a+b), der:(a,b)=>S(a)*C(b)+C(a)*S(b),
+    pasos:'Se demuestra girando ángulos sobre el círculo unitario. Es la base de casi todas las demás.' },
+  { grupo:'Ángulo suma y diferencia',
+    numero:7, nombre:'Coseno de la suma', tex:'cos(a+b) = cos a·cos b − sen a·sen b', needsB:true,
+    izq:(a,b)=>C(a+b), der:(a,b)=>C(a)*C(b)-S(a)*S(b),
+    pasos:'Ojo con el signo MENOS: el coseno de una suma resta. Se ve en el círculo unitario.' },
+  { grupo:'Ángulo suma y diferencia',
+    numero:8, nombre:'Coseno de la diferencia', tex:'cos(a−b) = cos a·cos b + sen a·sen b', needsB:true,
+    izq:(a,b)=>C(a-b), der:(a,b)=>C(a)*C(b)+S(a)*S(b),
+    pasos:'Cambia b por −b en la fórmula de la suma (sen(−b)=−sen b, cos(−b)=cos b).' },
+  { grupo:'Ángulo suma y diferencia',
+    numero:9, nombre:'Tangente de la suma', tex:'tan(a+b) = (tan a + tan b) / (1 − tan a·tan b)', needsB:true,
+    izq:(a,b)=>T(a+b), der:(a,b)=>(T(a)+T(b))/(1-T(a)*T(b)),
+    pasos:'Se obtiene dividiendo sen(a+b) entre cos(a+b) y pasando todo a tangentes.' },
+
+  { grupo:'Ángulo doble y mitad',
+    numero:10, nombre:'Seno del ángulo doble', tex:'sen 2a = 2·sen a·cos a',
+    izq:(a)=>S(2*a), der:(a)=>2*S(a)*C(a),
+    pasos:'Pon b = a en sen(a+b): sen(2a)=sen a cos a + cos a sen a = 2 sen a cos a.' },
+  { grupo:'Ángulo doble y mitad',
+    numero:11, nombre:'Coseno del ángulo doble', tex:'cos 2a = cos²a − sen²a = 1 − 2sen²a = 2cos²a − 1',
+    izq:(a)=>C(2*a), der:(a)=>C(a)**2-S(a)**2,
+    pasos:'Pon b = a en cos(a+b). Usando sen²+cos²=1 salen las tres formas equivalentes: cos²−sen², 1−2sen² y 2cos²−1.' },
+  { grupo:'Ángulo doble y mitad',
+    numero:12, nombre:'Tangente del ángulo doble', tex:'tan 2a = 2·tan a / (1 − tan²a)',
+    izq:(a)=>T(2*a), der:(a)=>2*T(a)/(1-T(a)**2),
+    pasos:'Pon b = a en la tangente de la suma.' },
+  { grupo:'Ángulo doble y mitad',
+    numero:13, nombre:'Ángulo mitad', tex:'sen²(a/2) = (1 − cos a)/2 ·  cos²(a/2) = (1 + cos a)/2',
+    izq:(a)=>S(a/2)**2, der:(a)=>(1-C(a))/2, needsB:false,
+    pasos:'Despejando sen²a y cos²a de cos 2x = 1 − 2sen²x = 2cos²x − 1.' },
+
+  { grupo:'Ángulos complementarios',
+    numero:14, nombre:'Complementarios', tex:'sen(90°−a) = cos a · cos(90°−a) = sen a',
+    izq:(a)=>S(90-a), der:(a)=>C(a),
+    pasos:'En un triángulo rectángulo, los dos ángulos agudos suman 90°. El cateto opuesto de uno es el contiguo del otro: por eso sen y cos se intercambian.' },
+  { grupo:'Ángulos complementarios',
+    numero:15, nombre:'Reducción y simetría', tex:'sen(180°−a) = sen a · cos(180°−a) = −cos a',
+    izq:(a)=>S(180-a), der:(a)=>S(a),
+    pasos:'Es la regla de los cuadrantes: en el cuadrante II, el seno se mantiene y el coseno cambia de signo.' }
+];
+
+function fmtId(x){
+  if(x===undefined||x===null||Number.isNaN(x)) return '∄';
+  if(!isFinite(x)) return '±∞';
+  if(Math.abs(x)>1e6) return '≈±∞ (asíntota)';
+  return (Math.round(x*1e6)/1e6).toString();
+}
+function renderIdentidades(){
+  const a=parseFloat(document.getElementById('idaRange').value);
+  const b=parseFloat(document.getElementById('idbRange').value);
+  document.getElementById('idaVal').textContent=a+'°';
+  document.getElementById('idbVal').textContent=b+'°';
+  const cont=document.getElementById('idGroups');
+  const groups={};
+  IDENTIDADES.forEach(id=>{ (groups[id.grupo]=groups[id.grupo]||[]).push(id); });
+  if(!cont.dataset.built){
+    let html='';
+    for(const g in groups){
+      html+='<div class="card"><h3>'+g+'</h3>';
+      groups[g].forEach(id=>{
+        html+='<div class="idcard" data-id="'+id.numero+'">'
+          + '<div><b>'+id.numero+'. '+id.nombre+'</b></div>'
+          + '<div class="formula">'+id.tex+'</div>'
+          + '<div class="idverify" id="verify-'+id.numero+'"></div>'
+          + '<details><summary>¿Por qué es cierta?</summary><p class="muted" style="margin:8px 0 0">'+id.pasos+'</p></details>'
+          + '</div>';
+      });
+      html+='</div>';
+    }
+    cont.innerHTML=html;
+    cont.dataset.built='1';
+  }
+  // Verificación en vivo
+  IDENTIDADES.forEach(id=>{
+    const el=document.getElementById('verify-'+id.numero); if(!el) return;
+    const L=id.izq(a,b), R=id.der(a,b);
+    const cerca = (isFinite(L)&&isFinite(R)) && Math.abs(L-R) < 1e-4*Math.max(1,Math.abs(L));
+    const cambia = Math.abs(L)>1e6||Math.abs(R)>1e6||!isFinite(L)||!isFinite(R);
+    el.innerHTML = 'izquierda = <b>'+fmtId(L)+'</b> · derecha = <b>'+fmtId(R)+'</b> '
+      + (cambia ? '<span class="badge no">≈ cerca de una asíntota</span>'
+                : cerca ? '<span class="badge ok">✓ se cumple</span>'
+                        : '<span class="badge no">revisa el ángulo</span>');
+  });
+}
+document.getElementById('idaRange').addEventListener('input',renderIdentidades);
+document.getElementById('idbRange').addEventListener('input',renderIdentidades);
+
+/* =========================================================================
+   7. PRÁCTICA (quiz)
+   ========================================================================= */
+const quiz = { active:false, diff:'facil', score:0, streak:0, best:0, hits:0, miss:0, time:60, timer:0, answered:false, current:null };
+
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function poolFor(diff){
+  if(diff==='facil') return SPECIAL.filter(s=>s.deg<=90);
+  return SPECIAL.filter(s=>s.deg>0 && s.deg<360); // 30..330
+}
+function distinctValues(fn, pool, exclude){
+  const set=[]; for(const s of pool){ const v=s[fn]; if(v!=='—' && v!==exclude && !set.includes(v)) set.push(v); }
+  return set;
+}
+
+function makeQuestion(){
+  const diff=quiz.diff;
+  const types = diff==='facil' ? ['valor','valor','rad','angulo']
+              : diff==='medio' ? ['valor','valor','signo','rad','angulo']
+              : ['valor','signo','rad','angulo','identidad','identidad'];
+  const t=pick(types);
+  const pool=poolFor(diff);
+  if(t==='valor') return qValor(pool,diff);
+  if(t==='signo') return qSigno(pool);
+  if(t==='angulo') return qAngulo(pool,diff);
+  if(t==='rad') return qRad(pool,diff);
+  return qIdentidad();
+}
+
+function qValor(pool,diff){
+  const fn=pick(['sin','cos','tan']);
+  const label={sin:'sen',cos:'cos',tan:'tan'}[fn];
+  const sp=pick(pool.filter(s=>s[fn]!=='—'));
+  const correct=sp[fn];
+  const others=shuffle(distinctValues(fn,SPECIAL.filter(s=>s.deg<360),correct)).slice(0,3);
+  const opts=shuffle([correct,...others]);
+  let expl;
+  const ref=refAngle(sp.deg===360?0:sp.deg);
+  if(sp.deg===90&&fn==='cos') expl='cos 90° = 0 porque a 90° el punto está sobre el eje Y: no avanza nada en x.';
+  else if([30,45,60].includes(ref)) expl=label+' '+sp.deg+'°: el ángulo de referencia es '+ref+'°, y en el triángulo '+ (ref===45?'45-45-90':'30-60-90') +' sale el valor '+correct+'. El signo lo fija el cuadrante '+quadrantName(sp.deg)+'.';
+  else expl=label+' '+sp.deg+'° = '+correct+'. Ángulo de referencia '+ref+'° y signo del cuadrante '+quadrantName(sp.deg)+'.';
+  return {prompt:'¿Cuánto vale <b>'+label+' '+sp.deg+'°</b>?', options:opts, correct:correct, expl};
+}
+function qSigno(pool){
+  const fn=pick(['sin','cos','tan']);
+  const label={sin:'sen',cos:'cos',tan:'tan'}[fn];
+  const chair=pool.filter(s=>['II','III','IV'].includes(quadrantName(s.deg)) && s[fn]!=='—' && s[fn]!=='0');
+  const sp=pick(chair);
+  const v=sp[fn]; const correct = v.startsWith('−')?'Negativo':'Positivo';
+  return {prompt:'¿Qué <b>signo</b> tiene <b>'+label+' '+sp.deg+'°</b>? (cuadrante '+quadrantName(sp.deg)+')',
+    options:['Positivo','Negativo','Cero'], correct, expl:'En el cuadrante '+quadrantName(sp.deg)+', '+label+' es '+correct.toLowerCase()+'. Regla: Todos/Sen/Tan/Cos (I/II/III/IV) son positivos.'};
+}
+function qAngulo(pool,diff){
+  const fn=pick(['sin','cos','tan']);
+  const label={sin:'sen',cos:'cos',tan:'tan'}[fn];
+  const first=SPECIAL.filter(s=>s.deg<=90 && s[fn]!=='—');
+  const sp=pick(first);
+  const opts=shuffle(first.filter(s=>s.deg!==sp.deg).map(s=>s.deg+'°')).slice(0,3);
+  const all=shuffle([sp.deg+'°',...opts]);
+  return {prompt:'¿Qué ángulo notable entre 0° y 90° cumple <b>'+label+' θ = '+sp[fn]+'</b>?', options:all, correct:sp.deg+'°',
+    expl:'sen/cos/tan de '+sp.deg+'° da '+sp[fn]+'. Recuerda el patrón √n/2.'};
+}
+function qRad(pool,diff){
+  const src = diff==='facil' ? SPECIAL.filter(s=>s.deg<=90) : SPECIAL.filter(s=>s.deg>0&&s.deg<360);
+  const sp=pick(src);
+  const toRad=Math.random()<0.5;
+  if(toRad){
+    const opts=shuffle(SPECIAL.filter(s=>s.deg!==sp.deg).map(s=>s.radStr)).slice(0,3);
+    return {prompt:'¿A cuántos <b>radianes</b> equivalen <b>'+sp.deg+'°</b>?', options:shuffle([sp.radStr,...opts]), correct:sp.radStr,
+      expl:sp.deg+'° × π/180 = '+sp.radStr+'.'};
+  } else {
+    const opts=shuffle(SPECIAL.filter(s=>s.deg!==sp.deg).map(s=>s.deg+'°')).slice(0,3);
+    return {prompt:'¿A cuántos <b>grados</b> equivalen <b>'+sp.radStr+'</b>?', options:shuffle([sp.deg+'°',...opts]), correct:sp.deg+'°',
+      expl:sp.radStr+' × 180/π = '+sp.deg+'°.'};
+  }
+}
+const IDQ = [
+  {q:'Completa: sen²a + ___ = 1', opts:['cos²a','1 − sen a','tan²a','sen 2a'], correct:'cos²a', expl:'Es la identidad pitagórica: sen²a + cos²a = 1.'},
+  {q:'¿A qué es igual cos 2a?', opts:['cos²a − sen²a','2 sen a cos a','sen²a − cos²a','1 + sen²a'], correct:'cos²a − sen²a', expl:'cos 2a = cos²a − sen²a = 1 − 2sen²a = 2cos²a − 1.'},
+  {q:'¿A qué es igual sen 2a?', opts:['2 sen a cos a','sen a + cos a','cos²a − sen²a','sen a − cos a'], correct:'2 sen a cos a', expl:'sen 2a = 2 sen a cos a.'},
+  {q:'sen(a + b) = ?', opts:['sen a cos b + cos a sen b','sen a + sen b','cos a cos b − sen a sen b','sen a cos b − cos a sen b'], correct:'sen a cos b + cos a sen b', expl:'Seno de la suma: sen a cos b + cos a sen b.'},
+  {q:'cos(a − b) = ?', opts:['cos a cos b + sen a sen b','cos a cos b − sen a sen b','sen a cos b − cos a sen b','cos a − cos b'], correct:'cos a cos b + sen a sen b', expl:'Coseno de la diferencia: cos a cos b + sen a sen b.'},
+  {q:'tan a se puede escribir como…', opts:['sen a / cos a','cos a / sen a','1 / sen a','sen a · cos a'], correct:'sen a / cos a', expl:'tan a = sen a / cos a.'},
+  {q:'Si sen²a + cos²a = 1, entonces 1 + tan²a = ?', opts:['sec²a','csc²a','cot²a','cos²a'], correct:'sec²a', expl:'Dividiendo la pitagórica entre cos²a sale 1 + tan²a = sec²a.'},
+  {q:'sen(90° − a) = ?', opts:['cos a','sen a','−cos a','tan a'], correct:'cos a', expl:'Ángulos complementarios: sen(90°−a) = cos a.'}
+];
+function qIdentidad(){
+  const it=pick(IDQ);
+  return {prompt:'<b>Identidad:</b> '+it.q, options:shuffle(it.opts), correct:it.correct, expl:it.expl};
+}
+
+function renderQuizHUD(){
+  document.getElementById('qScore').textContent=quiz.score;
+  document.getElementById('qStreak').textContent=quiz.streak;
+  document.getElementById('qTime').textContent=quiz.time;
+  document.getElementById('qBar').style.width=(quiz.time/60*100)+'%';
+}
+function startQuiz(diff){
+  quiz.active=true; quiz.diff=diff; quiz.score=0; quiz.streak=0; quiz.best=0; quiz.hits=0; quiz.miss=0; quiz.time=60;
+  document.getElementById('quizStart').style.display='none';
+  document.getElementById('quizOver').style.display='none';
+  document.getElementById('quizGame').style.display='block';
+  renderQuizHUD();
+  clearInterval(quiz.timer);
+  quiz.timer=setInterval(()=>{
+    quiz.time--; renderQuizHUD();
+    if(quiz.time<=5&&quiz.time>0) Sound.tick();
+    if(quiz.time<=0) endQuiz();
+  },1000);
+  nextQuestion();
+}
+function nextQuestion(){
+  quiz.answered=false;
+  quiz.current=makeQuestion();
+  document.getElementById('qPrompt').innerHTML=quiz.current.prompt;
+  const box=document.getElementById('qOptions'); box.innerHTML='';
+  quiz.current.options.forEach(op=>{
+    const b=document.createElement('button'); b.className='opt'; b.innerHTML=op;
+    b.addEventListener('click',()=>answer(b,op));
+    box.appendChild(b);
+  });
+  document.getElementById('qFeedback').className='feedback';
+  document.getElementById('qFeedback').innerHTML='';
+  document.getElementById('qNext').style.display='none';
+}
+function answer(btn,val){
+  if(quiz.answered) return; quiz.answered=true;
+  const correct=quiz.current.correct;
+  const opts=[...document.querySelectorAll('#qOptions .opt')];
+  opts.forEach(o=>o.disabled=true);
+  const fb=document.getElementById('qFeedback');
+  if(val===correct){
+    btn.classList.add('good'); Sound.ok();
+    quiz.hits++; quiz.streak++; quiz.best=Math.max(quiz.best,quiz.streak);
+    const gain=10+ (quiz.streak-1)*2;
+    quiz.score+=gain;
+    fb.className='feedback ok show'; fb.innerHTML='<b>¡Bien! +'+gain+'</b><br>'+quiz.current.expl;
+  } else {
+    btn.classList.add('bad'); Sound.err();
+    quiz.miss++; quiz.streak=0;
+    opts.forEach(o=>{ if(o.innerHTML===correct) o.classList.add('good'); });
+    fb.className='feedback err show'; fb.innerHTML='<b>Incorrecto.</b> La respuesta era <b>'+correct+'</b>.<br>'+quiz.current.expl;
+  }
+  renderQuizHUD();
+  document.getElementById('qNext').style.display='inline-block';
+}
+function endQuiz(){
+  clearInterval(quiz.timer); quiz.active=false;
+  document.getElementById('quizGame').style.display='none';
+  document.getElementById('quizOver').style.display='block';
+  document.getElementById('qFinal').textContent=quiz.score;
+  document.getElementById('qHits').textContent=quiz.hits;
+  document.getElementById('qMiss').textContent=quiz.miss;
+  document.getElementById('qBestStreak').textContent=quiz.best;
+  const saved=+(localStorage.getItem('sct_best')||0);
+  if(quiz.score>saved){ localStorage.setItem('sct_best',quiz.score); }
+  document.getElementById('bestScore').textContent=Math.max(saved,quiz.score);
+  const total=quiz.hits+quiz.miss;
+  const acc=total?Math.round(quiz.hits/total*100):0;
+  document.getElementById('qMsg').textContent = acc>=85?'¡Excelente! Dominas los ángulos notables ('+acc+'% de acierto).' : acc>=60?'¡Buen trabajo! Vas por buen camino ('+acc+'%).' : 'Sigue practicando ('+acc+'%): vuelve al Laboratorio para reforzar la lógica.';
+  Sound.win();
+}
+document.getElementById('qNext').addEventListener('click',()=>{ Sound.click(); nextQuestion(); });
+document.getElementById('qQuit').addEventListener('click',()=>{ Sound.click(); clearInterval(quiz.timer); quiz.active=false;
+  document.getElementById('quizGame').style.display='none'; document.getElementById('quizStart').style.display='block'; });
+document.getElementById('quizStart').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-diff]'); if(!b) return; Sound.click(); startQuiz(b.dataset.diff);
+});
+document.getElementById('qAgain').addEventListener('click',()=>{ Sound.click(); startQuiz(quiz.diff); });
+document.getElementById('qMenu').addEventListener('click',()=>{ Sound.click();
+  document.getElementById('quizOver').style.display='none'; document.getElementById('quizStart').style.display='block'; });
+document.getElementById('bestScore').textContent = localStorage.getItem('sct_best')||0;
+
+/* =========================================================================
+   8. PAREJAS
+   ========================================================================= */
+const pairs={ deck:'sen', sel:null, found:0, total:0, moves:0, time:0, timer:0, active:false, left:[], right:[] };
+
+const DECKS={
+  sen:{ fn:'sin', label:'sen', angles:[0,30,45,60,90] },
+  cos:{ fn:'cos', label:'cos', angles:[0,30,45,60,90] },
+  tan:{ fn:'tan', label:'tan', angles:[0,30,45,60] },   // 90° no tiene tangente
+  rad:{ rad:true, angles:[0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330], n:6 }
+};
+
+function startPairs(deck){
+  pairs.deck=deck; pairs.sel=null; pairs.found=0; pairs.moves=0; pairs.time=0; pairs.active=true;
+  const d=DECKS[deck];
+  let chosen;
+  if(d.rad){
+    chosen=shuffle(d.angles).slice(0, d.n);
+    pairs.left=chosen.map(deg=>({deg, text:deg+'°'}));
+    pairs.right=chosen.map(deg=>({deg, text:SPECIAL.find(s=>s.deg===deg).radStr}));
+  } else {
+    chosen=shuffle(d.angles);
+    pairs.left=chosen.map(deg=>({deg, text:deg+'°'}));
+    pairs.right=chosen.map(deg=>({deg, text:SPECIAL.find(s=>s.deg===deg)[d.fn]}));
+  }
+  pairs.total=chosen.length;
+  document.getElementById('pairsCard').style.display='block';
+  document.getElementById('pTotal').textContent=pairs.total;
+  document.getElementById('pFound').textContent=0;
+  document.getElementById('pMoves').textContent=0;
+  document.getElementById('pTime').textContent=0;
+  document.getElementById('pFeedback').className='feedback';
+  renderPairs();
+  clearInterval(pairs.timer);
+  pairs.timer=setInterval(()=>{ if(!pairs.active) return; pairs.time++; document.getElementById('pTime').textContent=pairs.time; },1000);
+}
+function renderPairs(){
+  const L=document.getElementById('pLeft'), R=document.getElementById('pRight');
+  L.innerHTML=''; R.innerHTML='';
+  const lOrder=shuffle(pairs.left), rOrder=shuffle(pairs.right);
+  lOrder.forEach(o=>{
+    const b=document.createElement('button'); b.className='pair'; b.textContent=o.text;
+    b.dataset.deg=o.deg; b.dataset.side='L';
+    b.addEventListener('click',()=>clickCard(b));
+    L.appendChild(b);
+  });
+  rOrder.forEach(o=>{
+    const b=document.createElement('button'); b.className='pair'; b.textContent=o.text;
+    b.dataset.deg=o.deg; b.dataset.side='R';
+    b.addEventListener('click',()=>clickCard(b));
+    R.appendChild(b);
+  });
+}
+function clickCard(b){
+  if(b.classList.contains('done')) return;
+  if(!pairs.sel){
+    if(b.dataset.side!=='L'){ flashPairs('Empieza eligiendo un ÁNGULO (columna izquierda).',false); return; }
+    pairs.sel=b; b.classList.add('sel'); Sound.click(); return;
+  }
+  // Ya hay una seleccionada
+  if(b===pairs.sel){ b.classList.remove('sel'); pairs.sel=null; return; }
+  if(b.dataset.side==='L'){ pairs.sel.classList.remove('sel'); pairs.sel=b; b.classList.add('sel'); Sound.click(); return; }
+  // Comparar
+  pairs.moves++; document.getElementById('pMoves').textContent=pairs.moves;
+  if(b.dataset.deg===pairs.sel.dataset.deg){
+    const a=pairs.sel; a.classList.remove('sel'); a.classList.add('done'); b.classList.add('done');
+    pairs.found++; document.getElementById('pFound').textContent=pairs.found;
+    Sound.ok(); pairs.sel=null;
+    if(pairs.found===pairs.total){
+      pairs.active=false; clearInterval(pairs.timer);
+      flashPairs('¡Completado! 🎉 '+pairs.total+' parejas en '+pairs.time+'s y '+pairs.moves+' intentos.',true);
+      Sound.win();
+    }
+  } else {
+    const a=pairs.sel; a.classList.add('bad'); b.classList.add('bad');
+    Sound.err(); pairs.sel=null;
+    flashPairs('No coinciden. ¡Fíjate en el ángulo de referencia!',false);
+    setTimeout(()=>{ a.classList.remove('bad'); b.classList.remove('bad'); },420);
+  }
+}
+function flashPairs(msg,ok){
+  const el=document.getElementById('pFeedback');
+  el.className='feedback show '+(ok?'ok':'err');
+  el.innerHTML=msg;
+}
+document.getElementById('pReset').addEventListener('click',()=>{ Sound.click(); startPairs(pairs.deck); });
+document.getElementById('s-parejas').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-deck]'); if(!b) return; Sound.click(); startPairs(b.dataset.deck);
+});
+
+/* =========================================================================
+   9. INIT
+   ========================================================================= */
+function redrawAll(){ drawCircle(); drawMini(); drawGraph(); }
+window.addEventListener('resize',()=>{ redrawAll(); });
+setLab(45);
+renderIdentidades();
+drawMini(); drawGraph();
+</script>
+</body>
+</html>
